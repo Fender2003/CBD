@@ -1,11 +1,11 @@
 import requests
 
-API_KEY = "8AUwEJfTl9Bd3CPAPzAij4r8t7Kblif1A3C9MwxDSLKdN1r9IsHlpgzMPiuQ52xJ"  # <-- Replace with your actual DistanceMatrix.ai API key
+API_KEY = "8AUwEJfTl9Bd3CPAPzAij4r8t7Kblif1A3C9MwxDSLKdN1r9IsHlpgzMPiuQ52xJ" 
 
-# Sample locations (can use city names or coordinates)
-origins = ["Sardar Nagar, Nizampura, Vadodara, Gujarat, India"]
-
-destinations = ["Amitnagar Circle, Vadodara, India"]
+# origins = ["Sardar Nagar, Nizampura, Vadodara, Gujarat, India"]
+# destinations = ["Amitnagar Circle, Vadodara, India"]
+origins = ["22.3251,73.1811"]
+destinations = ["22.3108,73.2126"]
 
 def get_distances(origins, destinations, key):
     base_url = "https://api.distancematrix.ai/maps/api/distancematrix/json"
@@ -38,3 +38,4 @@ def get_distances(origins, destinations, key):
                 print(f"From {origin} to {destination}: {el['status']}")
 
 get_distances(origins, destinations, API_KEY)
+

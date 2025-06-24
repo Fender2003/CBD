@@ -1,6 +1,3 @@
-# SQLAlchemy base class
-from app.db.models import user  # import all models here
-from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
-
+# app/db/base.py
+from app.db.base_class import Base
+from app.db.models import user, group, group_card, group_player
