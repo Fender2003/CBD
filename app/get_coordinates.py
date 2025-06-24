@@ -1,7 +1,7 @@
 import requests
 
 API_KEY = "tx9ndK9SI3VlhQNdF8p1btlxliGYkXuctFlB7quAGxfjLwKa9I7Pa5z377nSANbt"
-address = "Sardar Nagar, Nizampura, Vadodara, Gujarat, India"
+address = "sevasi, Vadodara, Gujarat, India"
 def get_coordinates(address, key):
     base_url = "https://api.distancematrix.ai/maps/api/geocode/json"
     params = {

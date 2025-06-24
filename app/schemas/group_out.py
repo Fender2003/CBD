@@ -14,7 +14,7 @@ class GroupOut(BaseModel):
 class GroupCardOut(BaseModel):
     id: int
     group_id: int
-    gender_age: int
+    average_age: int
     gender_combo: str
     centroid: Optional[str] = None
 
