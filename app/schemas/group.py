@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, date, time
 from uuid import UUID
 
 class GroupCreate(BaseModel):
@@ -11,3 +11,7 @@ class GroupCreate(BaseModel):
 
 class GroupCardCreate(BaseModel):
     group_id: int
+    
+    start_time: time
+    end_time: time
+    booking_date: date

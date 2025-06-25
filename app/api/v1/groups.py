@@ -13,4 +13,4 @@ def create_group(group: GroupCreate, db: Session = Depends(get_db)):
 
 @router.post("/card", response_model=GroupCardOut)
 def create_group_card(data: GroupCardCreate, db: Session = Depends(get_db)):
-    return crud_group.create_group_card(db, data.group_id)
+    return crud_group.create_group_card(db, data.group_id, data.start_time, data.end_time, data.booking_date)

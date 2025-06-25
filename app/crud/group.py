@@ -5,6 +5,7 @@ from app.db.models.group_card import GroupCard
 from app.db.models.user import User
 from app.utils.geo_matrix import get_coordinates 
 import json
+from datetime import date, time
 
 def create_group(db: Session, name: str, leader_id: str, phone_numbers: list):
     group = Group(name=name, leader_id=leader_id)
@@ -28,7 +29,7 @@ def create_group(db: Session, name: str, leader_id: str, phone_numbers: list):
     return group
 
 
-def create_group_card(db: Session, group_id: int):
+def create_group_card(db: Session, group_id: int, start_time: time, end_time: time, booking_date: date):
     players = db.query(GroupPlayer).filter(GroupPlayer.group_id == group_id).all()
     player_ids = [p.user_id for p in players]
     player_objs = db.query(User).filter(User.id.in_(player_ids)).all()
@@ -37,8 +38,11 @@ def create_group_card(db: Session, group_id: int):
         return None
 
     avg_age = int(sum(p.age for p in player_objs) / len(player_objs))
+
     genders = [p.gender.lower() for p in player_objs]
     gender_combo = "".join(sorted([g[0] for g in genders]))
+
+    player_count = len(player_objs)
 
     coords = []
     for player in player_objs:
@@ -60,7 +64,11 @@ def create_group_card(db: Session, group_id: int):
         group_id=group_id,
         average_age=avg_age,
         gender_combo=gender_combo,
-        centroid=json.dumps(centroid) if centroid else None
+        centroid=json.dumps(centroid) if centroid else None,
+        start_time=start_time,
+        end_time=end_time,
+        booking_date=booking_date,
+        player_count=player_count
     )
 
     db.add(group_card)
