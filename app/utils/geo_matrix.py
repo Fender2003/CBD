@@ -1,7 +1,7 @@
 # utils/geo.py
 import requests
 
-API_KEY = "key"
+API_KEY = "tx9ndK9SI3VlhQNdF8p1btlxliGYkXuctFlB7quAGxfjLwKa9I7Pa5z377nSANbt"
 
 def get_coordinates(address: str) -> tuple[float, float] | None:
     url = "https://api.distancematrix.ai/maps/api/geocode/json"
