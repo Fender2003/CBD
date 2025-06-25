@@ -42,26 +42,21 @@ def calculate_match_score(g1, g2, court_coords_dict):
     if pcount != 4:
         return 0
 
-    # Age score
     age_diff = abs(g1["average_age"] - g2["average_age"])
-    age_score = max(0, 1 - (age_diff / 40))  # assume 20 yrs difference max
+    age_score = max(0, 1 - (age_diff / 40))
 
-    # Date score
     date_score = 1.0 if g1["booking_date"] == g2["booking_date"] else 0.0
 
-    # 3. Time score
     fmt = "%H:%M:%S.%f"
     s1, e1 = datetime.strptime(g1["start_time"], fmt), datetime.strptime(g1["end_time"], fmt)
     s2, e2 = datetime.strptime(g2["start_time"], fmt), datetime.strptime(g2["end_time"], fmt)
     overlap = time_overlap_minutes(s1, e1, s2, e2)
     time_score = min(overlap / 60, 1.0)
 
-    # 4. Gender logic
     gender_combo = g1["gender_combo"] + g2["gender_combo"]
     solo_girl_flag = (gender_combo.count("f") == 1)
     gender_score = 0.5 if solo_girl_flag else 1.0
 
-    # 5. Distance score (find closest midpoint court and scale)
     group_distance = geodesic((c1["lat"], c1["lng"]), (c2["lat"], c2["lng"])).km
     distance_score = max(0, 1 - (group_distance / 10))  # scale: if >10 km, score drops
 
