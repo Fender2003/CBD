@@ -15,7 +15,6 @@ class UserCreate(BaseModel):
     address: str
     city: str
     state: str
-    
 
 class UserOut(BaseModel):
     id: uuid.UUID

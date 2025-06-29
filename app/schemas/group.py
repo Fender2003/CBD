@@ -8,7 +8,6 @@ class GroupCreate(BaseModel):
     leader_id: UUID
     friend_phone_numbers: List[str]
 
-
 class GroupCardCreate(BaseModel):
     group_id: int
     
