@@ -6,6 +6,8 @@ from app.db.session import engine
 from app.api.v1 import groups
 from app.db.models import user, group, group_card, group_player
 from app.api.v1 import match
+from app.api.v1 import auction
+from app.api.v1 import court
 
 import traceback
 
@@ -13,6 +15,9 @@ app = FastAPI(debug=True)
 
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(groups.router, prefix="/api/v1/groups", tags=["groups"])
+app.include_router(auction.router, prefix="/api/v1", tags=["auction"])
+app.include_router(court.router, prefix="/api/v1")
+
 app.include_router(match.router, prefix="/api/v1", tags=["match"])
 
 try:
@@ -22,3 +27,5 @@ try:
 except Exception:
     print("Database initialization failed")
     traceback.print_exc()
+
+
