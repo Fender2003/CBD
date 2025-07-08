@@ -10,6 +10,8 @@ class CourtCreate(BaseModel):
     number_of_courts: int
     opening_time: time
     closing_time: time
+    latitude: float
+    longitude: float
 
 class CourtOut(CourtCreate):
     id: int

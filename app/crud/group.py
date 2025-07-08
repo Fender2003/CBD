@@ -7,29 +7,56 @@ from app.utils.geo_matrix import get_coordinates
 import json
 from datetime import date, time
 
-def create_group(db: Session, name: str, leader_id: str, phone_numbers: list):
-    group = Group(name=name, leader_id=leader_id)
+def create_group(db: Session, match_type: str, name: str, leader_id: str, phone_numbers: list):
+    if match_type not in ["singles", "doubles"]:
+        raise ValueError("match_type must be 'singles' or 'doubles'")
+
+    if match_type == "singles":
+        if len(phone_numbers) >= 1:
+            raise ValueError("Singles match must have only one friend.")
+    elif match_type == "doubles":
+        if len(phone_numbers) >= 3:
+            raise ValueError("Doubles match must have exactly three friends.")
+
+    group = Group(name=name, leader_id=leader_id, match_type=match_type)
     db.add(group)
     db.commit()
     db.refresh(group)
 
-    # Fetch all friends by phone number
-    all_members = db.query(User).filter(User.phone_number.in_(phone_numbers)).all()
+    all_members = []
 
-    # Fetch leader and add if not already in the list
-    leader = db.query(User).get(leader_id)
-    if leader not in all_members:
-        all_members.append(leader)
+    if match_type == "singles":
+        leader = db.query(User).get(leader_id)
+        all_members = [leader]
+    else:
+        all_members = db.query(User).filter(User.phone_number.in_(phone_numbers)).all()
+        leader = db.query(User).get(leader_id)
+        if leader not in all_members:
+            all_members.append(leader)
 
-    # Create GroupPlayer entries
+        if len(all_members) > 4:
+            raise ValueError("Maximum 4 players allowed in a doubles match.")
+
     for member in all_members:
         db.add(GroupPlayer(group_id=group.id, user_id=member.id))
 
     db.commit()
     return group
 
+def create_group_card(
+    db: Session,
+    group_id: int,
+    start_time: time,
+    end_time: time,
+    booking_date: date,
+    court: str
+):
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if not group:
+        raise ValueError("Group not found.")
 
-def create_group_card(db: Session, group_id: int, start_time: time, end_time: time, booking_date: date):
+    match_type = group.match_type.lower()
+
     players = db.query(GroupPlayer).filter(GroupPlayer.group_id == group_id).all()
     player_ids = [p.user_id for p in players]
     player_objs = db.query(User).filter(User.id.in_(player_ids)).all()
@@ -37,19 +64,38 @@ def create_group_card(db: Session, group_id: int, start_time: time, end_time: ti
     if not player_objs:
         return None
 
-    avg_age = int(sum(p.age for p in player_objs) / len(player_objs))
-
-    genders = [p.gender.lower() for p in player_objs]
-    gender_combo = "".join(sorted([g[0] for g in genders]))
-
+    # Initialize defaults
+    avg_age = None
+    gender_combo = ""
+    coords = []
     player_count = len(player_objs)
 
-    coords = []
-    for player in player_objs:
-        full_address = f"{player.address}, {player.city}, {player.state}"
+    if match_type == "singles":
+        # Only use the group leader's info
+        leader = db.query(User).filter(User.id == group.leader_id).first()
+        if not leader:
+            return None
+
+        avg_age = leader.age
+        gender_combo = leader.gender[0].lower()
+        full_address = f"{leader.address}, {leader.city}, {leader.state}"
         latlng = get_coordinates(full_address)
-        if latlng:
-            coords.append(latlng)
+        coords = [latlng] if latlng else []
+        player_count = 1
+
+    elif match_type == "doubles":
+        avg_age = int(sum(p.age for p in player_objs) / len(player_objs))
+        genders = [p.gender.lower() for p in player_objs]
+        gender_combo = "".join(sorted([g[0] for g in genders]))
+
+        for player in player_objs:
+            full_address = f"{player.address}, {player.city}, {player.state}"
+            latlng = get_coordinates(full_address)
+            if latlng:
+                coords.append(latlng)
+
+    else:
+        raise ValueError("Invalid match type. Must be 'singles' or 'doubles'.")
 
     centroid = None
     if coords:
@@ -68,7 +114,8 @@ def create_group_card(db: Session, group_id: int, start_time: time, end_time: ti
         start_time=start_time,
         end_time=end_time,
         booking_date=booking_date,
-        player_count=player_count
+        player_count=player_count,
+        court=court
     )
 
     db.add(group_card)

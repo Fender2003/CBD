@@ -8,7 +8,7 @@ class GroupPlayer(Base):
     __tablename__ = "group_players"
 
     id = Column(Integer, primary_key=True)
-    group_id = Column(Integer, ForeignKey("group.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
 
     group = relationship("Group", back_populates="members")

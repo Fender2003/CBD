@@ -22,6 +22,8 @@ class GroupCardOut(BaseModel):
     end_time: time
     booking_date: date
     player_count: int
-    
+    court: str
+    is_in_lobby: bool
+
     class Config:
         orm_mode = True

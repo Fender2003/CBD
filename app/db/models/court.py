@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Time
+from sqlalchemy import Column, Integer, String, Time, Float
 from app.db.base_class import Base
 
 class Court(Base):
@@ -14,3 +14,6 @@ class Court(Base):
     number_of_courts = Column(Integer, nullable=False)
     opening_time = Column(Time, nullable=False)
     closing_time = Column(Time, nullable=False)
+
+    latitude = Column(Float, nullable = False)
+    longitude = Column(Float, nullable = False)
