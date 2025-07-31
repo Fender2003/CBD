@@ -11,7 +11,6 @@ def create_user(db: Session, user: UserCreate):
     hashed_pw = Hasher.get_password_hash(user.password)
     db_user = User(
         email=user.email,
-        username=user.username,
         hashed_password=hashed_pw,
         full_name = user.full_name,
         phone_number=user.phone_number,
@@ -19,7 +18,7 @@ def create_user(db: Session, user: UserCreate):
         age=user.age,
         address=user.address,
         city=user.city,
-        state=user.state,
+        state=user.state
     )
     db.add(db_user)
     try:

@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime, date, time
+from datetime import date, time
 from uuid import UUID
 
 
 class GroupOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     leader_id: UUID
 
@@ -13,8 +13,8 @@ class GroupOut(BaseModel):
         orm_mode = True
 
 class GroupCardOut(BaseModel):
-    id: int
-    group_id: int
+    id: UUID
+    group_id: UUID
     average_age: int
     gender_combo: str
     centroid: Optional[str] = None
@@ -22,8 +22,9 @@ class GroupCardOut(BaseModel):
     end_time: time
     booking_date: date
     player_count: int
-    court: str
+    arena_id: UUID
     is_in_lobby: bool
-
+    rated: bool
+    
     class Config:
         orm_mode = True

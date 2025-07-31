@@ -10,7 +10,6 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
-    username = Column(String(255), unique=True, nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
 
@@ -21,6 +20,7 @@ class User(Base):
     address = Column(String(255), nullable=False)
     city = Column(String(255), nullable=False)
     state = Column(String(255), nullable=False)
+    rating = Column(Integer, default = 1200, nullable=False)
 
 
 

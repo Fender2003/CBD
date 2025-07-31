@@ -1,13 +1,11 @@
 # schemas/user.py
 
 from pydantic import BaseModel, EmailStr
-from typing import Optional
 import uuid
 
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
-    username: str
     full_name: str
     phone_number: str
     gender: str
@@ -19,7 +17,6 @@ class UserCreate(BaseModel):
 class UserOut(BaseModel):
     id: uuid.UUID
     email: EmailStr
-    username: str
     is_verified: bool
     full_name: str
     phone_number: str
@@ -28,6 +25,7 @@ class UserOut(BaseModel):
     address: str
     city: str
     state: str
+    rating: int
 
     class Config:
         orm_mode = True

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
-from typing import List, Optional
-from datetime import datetime, date, time
+from typing import List
+from datetime import date, time
 from uuid import UUID
 from enum import Enum 
 
@@ -16,9 +16,11 @@ class GroupCreate(BaseModel):
     friend_phone_numbers: List[str]
 
 class GroupCardCreate(BaseModel):
-    group_id: int
-    
+    group_id: UUID
+
     start_time: time
     end_time: time
     booking_date: date
-    court: str
+    arena_id: UUID
+    rated: bool
+

@@ -6,6 +6,7 @@ from app.db.models.user import User
 from app.utils.geo_matrix import get_coordinates 
 import json
 from datetime import date, time
+import uuid
 
 def create_group(db: Session, match_type: str, name: str, leader_id: str, phone_numbers: list):
     if match_type not in ["singles", "doubles"]:
@@ -49,7 +50,8 @@ def create_group_card(
     start_time: time,
     end_time: time,
     booking_date: date,
-    court: str
+    arena_id: uuid,
+    rated: bool,
 ):
     group = db.query(Group).filter(Group.id == group_id).first()
     if not group:
@@ -115,7 +117,8 @@ def create_group_card(
         end_time=end_time,
         booking_date=booking_date,
         player_count=player_count,
-        court=court
+        arena_id=arena_id,
+        rated=rated,
     )
 
     db.add(group_card)

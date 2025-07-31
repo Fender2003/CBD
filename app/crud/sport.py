@@ -11,3 +11,4 @@ def create_sport(db: Session, sport: SportCreate):
 
 def get_all_sports(db: Session):
     return db.query(Sport).all()
+
