@@ -12,6 +12,13 @@ def create_group(db: Session, match_type: str, name: str, leader_id: str, phone_
     if match_type not in ["singles", "doubles"]:
         raise ValueError("match_type must be 'singles' or 'doubles'")
 
+    leader = db.query(User).get(leader_id)
+    if not leader:
+        raise ValueError("Leader not found")
+
+    if leader.phone_number in phone_numbers:
+        raise ValueError("You should not add your own phone number — leader is added automatically.")
+
     if match_type == "singles":
         if len(phone_numbers) >= 1:
             raise ValueError("Singles match must have only one friend.")

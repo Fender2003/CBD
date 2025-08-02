@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime
 from app.db.base_class import Base
 from sqlalchemy import Float, Time, Date
+from sqlalchemy.orm import relationship
 
 class User(Base):
     __tablename__ = "users"
@@ -29,3 +30,7 @@ class User(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+    
+    wins_losses = relationship("Wins_losses", back_populates="user")

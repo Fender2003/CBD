@@ -12,7 +12,57 @@ from datetime import datetime
 from geopy.distance import geodesic
 import json
 
-import app.ds.calculate_priority_score as calculate_priority_score
+from app.ds.calculate_priority_score import calculate_priority_score
+
+
+
+
+def groupcard_to_dict(g):
+    return {
+        "id": g.id,
+        "group_id": g.group_id,
+        "average_age": g.average_age,
+        "gender_combo": g.gender_combo,
+        "centroid": g.centroid,
+        "start_time": str(g.start_time),
+        "end_time": str(g.end_time),
+        "booking_date": str(g.booking_date),
+        "player_count": g.player_count,
+        "match_type": g.group.match_type,
+        "arena_id": g.arena_id,
+        "is_in_lobby": g.is_in_lobby,
+        "rated": g.rated
+    }
+
+
+
+@router.get("/smart_match/{group_card_id}")
+def smart_match(group_card_id: UUID, db: Session = Depends(get_db)):
+    current_group = db.query(GroupCard).filter(GroupCard.id == group_card_id).first()
+    if not current_group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    all_groups = db.query(GroupCard).filter(GroupCard.id != group_card_id).all()
+    current_data = groupcard_to_dict(current_group)
+
+    if(not current_data["is_in_lobby"]):
+        return {"msg": "Enter the lobby first"}
+    
+    results = []
+    for g in all_groups:
+        other_data = groupcard_to_dict(g)
+        score, primary, secondary = calculate_priority_score(current_data, other_data, db)
+        if score > 0:
+            results.append({
+                "group_card_id": g.id,
+                "match_score": score
+            })
+
+    sorted_results = sorted(results, key=lambda x: x["match_score"], reverse=True)
+    return {"matches": sorted_results}
+
+
+
 # def calculate_priority_score(g1, g2):
 
 #     score = 0
@@ -74,78 +124,3 @@ import app.ds.calculate_priority_score as calculate_priority_score
 
 
 
-def groupcard_to_dict(g):
-    return {
-        "id": g.id,
-        "group_id": g.group_id,
-        "average_age": g.average_age,
-        "gender_combo": g.gender_combo,
-        "centroid": g.centroid,
-        "start_time": str(g.start_time),
-        "end_time": str(g.end_time),
-        "booking_date": str(g.booking_date),
-        "player_count": g.player_count,
-        "match_type": g.group.match_type,
-        "arena_id": g.arena_id,
-        "is_in_lobby": g.is_in_lobby,
-        "rated": g.rated
-    }
-
-
-
-# @router.get("/smart_match/{group_card_id}")
-# def smart_match(group_card_id: UUID, db: Session = Depends(get_db)):
-#     current_group = db.query(GroupCard).filter(GroupCard.id == group_card_id).first()
-#     if not current_group:
-#         raise HTTPException(status_code=404, detail="Group not found")
-
-#     all_groups = db.query(GroupCard).filter(GroupCard.id != group_card_id).all()
-#     current_data = groupcard_to_dict(current_group)
-
-#     results = []
-#     for g in all_groups:
-#         other_data = groupcard_to_dict(g)
-#         score = calculate_priority_score(current_data, other_data)
-#         if score > 0:
-#             results.append({
-#                 "group_card_id": g.id,
-#                 "match_score": score
-#             })
-
-#     sorted_results = sorted(results, key=lambda x: x["match_score"], reverse=True)
-#     return {"matches": sorted_results}
-
-
-
-from app.ds.calculate_match_score_with_arena_distance import calculate_match_score_with_arena_distance
-
-@router.get("/smart_match/{group_card_id}")
-def smart_match(group_card_id: UUID, db: Session = Depends(get_db)):
-    current_group = db.query(GroupCard).filter(GroupCard.id == group_card_id).first()
-    if not current_group:
-        raise HTTPException(status_code=404, detail="Group not found")
-
-    all_groups = db.query(GroupCard).filter(GroupCard.id != group_card_id).all()
-    current_data = groupcard_to_dict(current_group)
-
-    results = []
-    for g in all_groups:
-        other_data = groupcard_to_dict(g)
-        total, primary, secondary = calculate_priority_score(current_data, other_data)
-
-        # NEW: Add arena distance score from the external util function
-        arena_score = calculate_match_score_with_arena_distance(current_group.group, g.group, db)
-
-        results.append({
-            "group_card": other_data,
-            "match_score": round(total + arena_score, 3),
-            "primary_score": primary,
-            "secondary_score": secondary,
-            "arena_proximity_score": arena_score
-        })
-
-    sorted_results = sorted(results, key=lambda x: x["match_score"], reverse=True)
-    return {
-        "target_group": current_data,
-        "matches": sorted_results
-    }

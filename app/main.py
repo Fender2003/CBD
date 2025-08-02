@@ -6,7 +6,6 @@ from app.db.session import engine
 from app.api.v1 import groups
 from app.db.models import court_owner, user, group, group_card, group_player, court_owner
 from app.api.v1 import match
-from app.api.v1 import court
 from app.api.v1 import sport
 from app.api.v1 import group_match_request
 from app.api.v1 import lobby_system
@@ -19,11 +18,10 @@ app = FastAPI(debug=True)
 
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(groups.router, prefix="/api/v1/groups", tags=["groups"])
-app.include_router(match.router, prefix="/api/v1", tags=["match"])
 app.include_router(lobby_system.router, prefix="/api/v1", tags=["lobby"])
+app.include_router(match.router, prefix="/api/v1", tags=["match"])
 app.include_router(group_match_request.router, prefix="/api/v1", tags=["matchRequest"])
 app.include_router(sport.router, prefix="/api", tags=["sport"])
-# app.include_router(court.router, prefix="/api/v1", tags=["court"])
 
 
 

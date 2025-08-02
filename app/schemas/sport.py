@@ -7,7 +7,7 @@ class SportCreate(SportBase):
     pass
 
 class SportOut(SportBase):
-    sport_id: uuid.UUID
+    id: uuid.UUID
     sport_name: str
 
     class Config:

@@ -19,6 +19,7 @@ class Arena(Base):
     owner_id = Column(UUID(as_uuid=True), ForeignKey("court_owners.id"), nullable=False)
     owner = relationship("CourtOwner", back_populates="arenas")
     
-    hourly_prices = relationship("ArenaHourlyPrice", back_populates="arena", cascade="all, delete-orphan")
-
     location_coordinates = Column(JSONB, nullable=True)
+
+    hourly_prices = relationship("ArenaHourlyPrice", back_populates="arena", cascade="all, delete-orphan")
+    completed_games = relationship("CompletedGame", back_populates="arena")

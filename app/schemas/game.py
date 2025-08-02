@@ -2,10 +2,12 @@ from datetime import datetime
 from typing import Optional, Dict
 from uuid import UUID
 from pydantic import BaseModel
+from sqlalchemy.orm import relationship
 
 
 class CompletedGameBase(BaseModel):
     court_id: UUID
+    sport_id: UUID
     groupcard1_id: UUID
     groupcard2_id: Optional[UUID]
     winner_group_id: Optional[UUID]
@@ -16,7 +18,6 @@ class CompletedGameBase(BaseModel):
 
     match_type: Optional[str]
     is_rated: Optional[bool] = True
-    rating_change: Optional[Dict[str, int]] = None
 
     notes: Optional[str] = None
 
