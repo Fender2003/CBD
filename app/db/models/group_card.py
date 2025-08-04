@@ -11,7 +11,7 @@ class GroupCard(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True,  default=uuid.uuid4, nullable=False)
     group_id = Column(UUID(as_uuid=True), ForeignKey("groups.id"))
-    group = relationship("Group", back_populates="group_card")
+    
 
     average_age = Column(Integer)
     gender_combo = Column(String)
@@ -27,5 +27,6 @@ class GroupCard(Base):
     arena_id = Column(UUID(as_uuid=True), ForeignKey("arenas.id"))
     is_in_lobby = Column(Boolean, default=False)
     rated = Column(Boolean, default=False)
-    
+
+
     group = relationship("Group", back_populates="group_card")

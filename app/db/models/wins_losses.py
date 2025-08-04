@@ -9,7 +9,7 @@ class Wins_losses(Base):
     __tablename__ = "wins_losses"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    game_id = Column(UUID(as_uuid=True), ForeignKey("game.id"), nullable=False)
+    game_id = Column(UUID(as_uuid=True), ForeignKey("completed_game.id"), nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
 
     game_wins = Column(Integer)
@@ -19,3 +19,5 @@ class Wins_losses(Base):
 
     game = relationship("CompletedGame", back_populates="wins_losses")
     user = relationship("User", back_populates="wins_losses")
+
+    completed_game = relationship("CompletedGame", back_populates="wins_losses")
