@@ -58,13 +58,61 @@ def prepare_wins_losses_entries(game_id: UUID, db: Session = Depends(get_db)):
         "user_ids": created_entries
     }
 
- 
-
 @router.post("/games/{game_id}/submit-results")
 def submit_match_results(game_id: UUID, stats: StatsSubmission, db: Session = Depends(get_db)):
     if game_id != stats.game_id:
         raise HTTPException(status_code=400, detail="Mismatched game ID in path and body.")
 
+    total_wins = 0
+    total_losses = 0
+
+    # Gather all players’ stats
+    game_counts = []
+    wins_list = []
+    losses_list = []
+
+    for player in stats.results:
+        # Rule 1: Player's wins + losses == number_of_games
+        if player.game_wins + player.game_losses != player.number_of_games:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Inconsistent stats for user {player.user_id}: wins + losses != total games played"
+            )
+
+        total_wins += player.game_wins
+        total_losses += player.game_losses
+
+        game_counts.append(player.number_of_games)
+        wins_list.append(player.game_wins)
+        losses_list.append(player.game_losses)
+
+    # Rule 2: Total wins == total losses
+    if total_wins != total_losses:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Total wins ({total_wins}) do not match total losses ({total_losses})"
+        )
+
+    player_count = len(stats.results)
+
+    # Rule 3: Extra check for 2 players
+    if player_count == 2:
+        p1, p2 = stats.results
+
+        if p1.number_of_games != p2.number_of_games:
+            raise HTTPException(
+                status_code=400,
+                detail="In 1v1 matches, both players must have played the same number of games."
+            )
+
+        if p1.game_wins != p2.game_losses or p2.game_wins != p1.game_losses:
+            raise HTTPException(
+                status_code=400,
+                detail="In 1v1 matches, one player's wins must equal the other's losses."
+            )
+
+
+    # update database
     for player in stats.results:
         entry = db.query(Wins_losses).filter_by(game_id=game_id, user_id=player.user_id).first()
         if not entry:
