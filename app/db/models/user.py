@@ -34,3 +34,4 @@ class User(Base):
 
     
     wins_losses = relationship("Wins_losses", back_populates="user")
+    pickleball_profile = relationship("PickleballProfile", uselist=False, back_populates="user")

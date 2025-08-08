@@ -6,6 +6,7 @@ from app.db.models.completed_game import CompletedGame
 from app.db.models.group_card import GroupCard
 from app.db.models.group_player import GroupPlayer 
 from app.db.models.wins_losses import Wins_losses
+from app.db.models.pickleball_profiles import PickleballProfile
 
 import uuid
 from app.schemas.wins_losses import StatsSubmission
@@ -111,17 +112,65 @@ def submit_match_results(game_id: UUID, stats: StatsSubmission, db: Session = De
                 detail="In 1v1 matches, one player's wins must equal the other's losses."
             )
 
+    # db.commit()
 
-    # update database
+    # Fetch rating flag from the completed_game table
+    completed_game = db.query(CompletedGame).filter_by(id=game_id).first()
+    if not completed_game:
+        raise HTTPException(status_code=404, detail=f"Game {game_id} not found in CompletedGame table.")
+
+    is_rated = completed_game.is_rated
+
+    # Loop through players to update profiles
     for player in stats.results:
-        entry = db.query(Wins_losses).filter_by(game_id=game_id, user_id=player.user_id).first()
-        if not entry:
-            raise HTTPException(status_code=404, detail=f"No entry found for user {player.user_id} in game {game_id}")
+        win_loss_entry = db.query(Wins_losses).filter_by(game_id=game_id, user_id=player.user_id).first()
 
-        entry.game_wins = player.game_wins
-        entry.game_losses = player.game_losses
-        entry.number_of_games = player.number_of_games
-        entry.rating_change = player.rating_change
+        if win_loss_entry:
+            win_loss_entry.game_wins = player.game_wins
+            win_loss_entry.game_losses = player.game_losses
+            win_loss_entry.number_of_games = player.number_of_games
+            win_loss_entry.rating_change = player.rating_change
+        else:
+            # Optionally create it if it doesn't exist (should exist if prepare was called)
+            # win_loss_entry = Wins_losses(
+            #     id=uuid.uuid4(),
+            #     game_id=game_id,
+            #     user_id=player.user_id,
+            #     game_wins=player.game_wins,
+            #     game_losses=player.game_losses,
+            #     number_of_games=player.number_of_games,
+            #     rating_change=player.rating_change
+            # )
+            db.add(win_loss_entry)
 
+        profile = db.query(PickleballProfile).filter_by(user_id=player.user_id).first()
+
+        if not profile:
+            profile = PickleballProfile(
+                user_id=player.user_id,
+                total_wins=0,
+                total_losses=0,
+                rated_games=0,
+                unrated_games=0,
+                rating_sequence=""
+            )
+            db.add(profile)
+
+        profile.total_wins = profile.total_wins + player.game_wins
+        profile.total_losses = profile.total_losses + player.game_losses
+
+        if is_rated:
+            profile.rated_games += player.number_of_games
+
+            # Append to rating_sequence
+            if profile.rating_sequence:
+                profile.rating_sequence = f"{player.rating_change:+.2f}"
+            else:
+                profile.rating_sequence += f",{player.rating_change:+.2f}"
+        else:
+            profile.unrated_games += player.number_of_games
+
+            
     db.commit()
+
     return {"detail": "Player stats updated successfully"}
