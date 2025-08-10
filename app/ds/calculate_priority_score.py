@@ -18,15 +18,6 @@ def calculate_priority_score(g1, g2, db):
         primary += 0.1
 
 
-
-
-
-
-
-
-
-
-
     # 2. Booking Date
     if g1["booking_date"] == g2["booking_date"]:
         primary += 0.20

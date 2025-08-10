@@ -15,9 +15,9 @@ class Wins_losses(Base):
     game_wins = Column(Integer)
     game_losses = Column(Integer)
     number_of_games = Column(Integer)
-    rating_change = Column(Integer)
+    rating_change = Column(Float)
 
-    game = relationship("CompletedGame", back_populates="wins_losses")
+    # game = relationship("CompletedGame", back_populates="wins_losses")
     user = relationship("User", back_populates="wins_losses")
 
     completed_game = relationship("CompletedGame", back_populates="wins_losses")

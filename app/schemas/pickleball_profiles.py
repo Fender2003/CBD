@@ -10,6 +10,7 @@ class PickleballProfileBase(BaseModel):
     rated_games: int
     unrated_games: int
     rating_sequence: str
+    rating: float
 
 
 class PickleballProfileCreate(BaseModel):
@@ -22,6 +23,7 @@ class PickleballProfileUpdate(BaseModel):
     rated_games: Optional[int] = None
     unrated_games: Optional[int] = None
     rating_sequence: Optional[str] = None
+    rating: Optional[float] = None
 
 
 class PickleballProfileOut(PickleballProfileBase):
