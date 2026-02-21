@@ -20,6 +20,6 @@ class PlayerResultOut(BaseModel):
     number_of_games: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 

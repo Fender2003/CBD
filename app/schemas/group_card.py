@@ -10,7 +10,7 @@ class GroupOut(BaseModel):
     leader_id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class GroupCardOut(BaseModel):
     id: UUID
@@ -27,4 +27,4 @@ class GroupCardOut(BaseModel):
     rated: bool
     
     class Config:
-        orm_mode = True
+        from_attributes = True

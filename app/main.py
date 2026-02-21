@@ -1,5 +1,6 @@
 # Entry point (runs FastAPI app)
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1 import users
 from app.db.base_class import Base
 from app.db.session import engine
@@ -18,6 +19,19 @@ from app.api.v1 import completed_game
 import traceback
 
 app = FastAPI(debug=True)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/")
+def root():
+    return {"status": "ok", "docs": "/docs"}
 
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(groups.router, prefix="/api/v1/groups", tags=["groups"])

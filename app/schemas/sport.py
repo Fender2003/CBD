@@ -11,4 +11,4 @@ class SportOut(SportBase):
     sport_name: str
 
     class Config:
-        orm_mode = True 
+        from_attributes = True 
