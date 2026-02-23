@@ -1,8 +1,9 @@
 # crud/user.py
 from sqlalchemy.orm import Session
 from app.db.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserProfileUpdate
 from app.core.hashing import Hasher
+from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
@@ -31,6 +32,23 @@ def create_user(db: Session, user: UserCreate):
 
 def get_user_by_email(db: Session, email: str):
     return db.query(User).filter(User.email == email).first()
+
+
+def get_user_by_id(db: Session, user_id: UUID):
+    return db.query(User).filter(User.id == user_id).first()
+
+
+def update_user_profile(db: Session, db_user: User, updates: UserProfileUpdate):
+    update_data = updates.model_dump(exclude_unset=True)
+    if not update_data:
+        return db_user
+
+    for field, value in update_data.items():
+        setattr(db_user, field, value)
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 
 
@@ -72,4 +90,3 @@ def get_user_by_email(db: Session, email: str):
 #     if not user or not Hasher.verify_password(password, user.hashed_password):
 #         raise HTTPException(status_code=401, detail="Invalid credentials")
 #     return user
-

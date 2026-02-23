@@ -1,15 +1,15 @@
 # User routes
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from fastapi.security import OAuth2PasswordRequestForm
 
 from app import crud, schemas
 from app.db.session import get_db
 from app.crud import user as crud_user
+from app.core.dependencies import get_current_user
 from app.core.hashing import Hasher
-from app.core import security
 from app.core.security import create_access_token
-from app.schemas.user import UserLogin
+from app.schemas.user import UserLogin, UserMe, UserProfileUpdate, LoginResponse
+from app.db.models.user import User
 
 
 
@@ -25,7 +25,8 @@ def register(user: schemas.user.UserCreate, db: Session = Depends(get_db)):
         )
     return crud.user.create_user(db, user)
 
-@router.post("/login")
+
+@router.post("/login", response_model=LoginResponse)
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = crud.user.get_user_by_email(db, user.email)
     if not db_user or not Hasher.verify_password(user.password, db_user.hashed_password):
@@ -34,5 +35,35 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
             detail="Invalid credentials",
         )
     
-    access_token = create_access_token(data={"sub": db_user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    access_token = create_access_token(
+        data={
+            "sub": db_user.email,          # backward-compatible for existing frontend token parsing
+            "user_id": str(db_user.id),    # stable identifier for newer clients
+            "email": db_user.email,
+        }
+    )
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_id": db_user.id,
+        "email": db_user.email,
+    }
+
+
+@router.get("/me", response_model=UserMe)
+def get_me(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.get("/profile", response_model=UserMe)
+def get_profile(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.patch("/profile", response_model=UserMe)
+def update_profile(
+    updates: UserProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return crud_user.update_user_profile(db, current_user, updates)

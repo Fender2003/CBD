@@ -28,3 +28,24 @@ class GroupCardOut(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class GroupCardUpdate(BaseModel):
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    booking_date: Optional[date] = None
+    rated: Optional[bool] = None
+    arena_id: Optional[UUID] = None
+
+
+class MyLobbyGroupCardOut(BaseModel):
+    group_card_id: UUID
+    group_id: UUID
+    match_type: str
+    booking_date: date
+    start_time: time
+    end_time: time
+    arena_id: UUID
+    rated: bool
+    player_count: int
+    is_in_lobby: bool

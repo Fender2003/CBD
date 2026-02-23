@@ -3,6 +3,7 @@ from app.db.models.group import Group
 from app.db.models.group_player import GroupPlayer
 from app.db.models.group_card import GroupCard
 from app.db.models.user import User
+from app.schemas.group_card import GroupCardUpdate
 from app.utils.geo_matrix import get_coordinates 
 import json
 from datetime import date, time
@@ -132,3 +133,93 @@ def create_group_card(
     db.commit()
     db.refresh(group_card)
     return group_card
+
+
+def get_group_card_owned_by_leader(db: Session, group_card_id: uuid.UUID, leader_id: uuid.UUID):
+    return (
+        db.query(GroupCard)
+        .join(Group, Group.id == GroupCard.group_id)
+        .filter(GroupCard.id == group_card_id, Group.leader_id == leader_id)
+        .first()
+    )
+
+
+def get_my_lobby_group_cards(db: Session, leader_id: uuid.UUID):
+    cards = (
+        db.query(GroupCard, Group.match_type)
+        .join(Group, Group.id == GroupCard.group_id)
+        .filter(Group.leader_id == leader_id, GroupCard.is_in_lobby.is_(True))
+        .all()
+    )
+
+    results = []
+    for card, match_type in cards:
+        results.append(
+            {
+                "group_card_id": card.id,
+                "group_id": card.group_id,
+                "match_type": match_type,
+                "booking_date": card.booking_date,
+                "start_time": card.start_time,
+                "end_time": card.end_time,
+                "arena_id": card.arena_id,
+                "rated": card.rated,
+                "player_count": card.player_count,
+                "is_in_lobby": card.is_in_lobby,
+            }
+        )
+    return results
+
+
+def get_challenge_lobby_group_cards(db: Session, leader_id: uuid.UUID | None = None):
+    query = (
+        db.query(GroupCard, Group)
+        .join(Group, Group.id == GroupCard.group_id)
+        .filter(
+            Group.match_type == "doubles",
+            GroupCard.player_count == 2,
+            GroupCard.rated.is_(True),
+            GroupCard.is_in_lobby.is_(True),
+        )
+        .order_by(Group.date_created.desc())
+    )
+
+    if leader_id is not None:
+        query = query.filter(Group.leader_id == leader_id)
+
+    rows = query.all()
+    return [
+        {
+            "group_card_id": card.id,
+            "group_id": card.group_id,
+            "group_name": group.name,
+            "match_type": group.match_type,
+            "booking_date": card.booking_date,
+            "start_time": card.start_time,
+            "end_time": card.end_time,
+            "arena_id": card.arena_id,
+            "rated": card.rated,
+            "player_count": card.player_count,
+            "is_in_lobby": card.is_in_lobby,
+            "created_at": group.date_created,
+        }
+        for card, group in rows
+    ]
+
+
+def update_group_card(db: Session, group_card: GroupCard, updates: GroupCardUpdate):
+    update_data = updates.model_dump(exclude_unset=True)
+    if not update_data:
+        return group_card
+
+    for field, value in update_data.items():
+        setattr(group_card, field, value)
+
+    db.commit()
+    db.refresh(group_card)
+    return group_card
+
+
+def delete_group_card(db: Session, group_card: GroupCard):
+    db.delete(group_card)
+    db.commit()

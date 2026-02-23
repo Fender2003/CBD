@@ -14,6 +14,7 @@ from app.api.v1 import court_owner
 from app.api.v1 import arena
 from app.api.v1 import wins_losses
 from app.api.v1 import completed_game
+from app.api.v1 import challenge_team
 
 
 import traceback
@@ -39,6 +40,7 @@ app.include_router(lobby_system.router, prefix="/api/v1", tags=["lobby"])
 app.include_router(match.router, prefix="/api/v1", tags=["match"])
 app.include_router(group_match_request.router, prefix="/api/v1", tags=["matchRequest"])
 app.include_router(completed_game.router, prefix="/api/v1", tags=["Game Finalize"])
+app.include_router(challenge_team.router, prefix="/api/v1", tags=["challengeTeam"])
 
 
 

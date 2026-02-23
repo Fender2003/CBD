@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Index
 from app.db.base_class import Base
 from sqlalchemy import Time, Date
 from sqlalchemy.orm import relationship
@@ -8,6 +8,24 @@ from sqlalchemy.dialects.postgresql import UUID
 
 class GroupCard(Base):
     __tablename__ = "group_cards"
+    __table_args__ = (
+        Index("ix_group_cards_group_id", "group_id"),
+        Index("ix_group_cards_is_in_lobby", "is_in_lobby"),
+        Index("ix_group_cards_rated", "rated"),
+        Index("ix_group_cards_player_count", "player_count"),
+        Index("ix_group_cards_booking_date", "booking_date"),
+        Index("ix_group_cards_start_time", "start_time"),
+        Index("ix_group_cards_end_time", "end_time"),
+        Index(
+            "ix_group_cards_challenge_lobby",
+            "is_in_lobby",
+            "rated",
+            "player_count",
+            "booking_date",
+            "start_time",
+            "end_time",
+        ),
+    )
 
     id = Column(UUID(as_uuid=True), primary_key=True,  default=uuid.uuid4, nullable=False)
     group_id = Column(UUID(as_uuid=True), ForeignKey("groups.id"))

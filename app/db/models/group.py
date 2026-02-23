@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Index
 from sqlalchemy.orm import relationship
 from datetime import date, time, datetime
 from app.db.base_class import Base
@@ -8,6 +8,7 @@ import uuid
 
 class Group(Base):
     __tablename__ = "groups"
+    __table_args__ = (Index("ix_groups_leader_id", "leader_id"),)
 
     id = Column(UUID(as_uuid=True), primary_key=True,  default=uuid.uuid4, nullable=False)
     match_type = Column(String, nullable=False, default='doubles')
@@ -19,4 +20,3 @@ class Group(Base):
 
     members = relationship("GroupPlayer", back_populates="group")
     group_card = relationship("GroupCard", back_populates="group", uselist=False)
-
