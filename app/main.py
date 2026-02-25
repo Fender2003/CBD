@@ -15,6 +15,7 @@ from app.api.v1 import arena
 from app.api.v1 import wins_losses
 from app.api.v1 import completed_game
 from app.api.v1 import challenge_team
+from app.core.config import settings
 
 
 import traceback
@@ -53,10 +54,11 @@ app.include_router(arena.router, prefix="/api/v1", tags=["Add Arena"])
 app.include_router(wins_losses.router, prefix="/api/v1", tags=["Add Game stats"])
 
 
-try:
-    # print("Dropping all tables...")
-    # Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-except Exception:
-    print("Database initialization failed")
-    traceback.print_exc()
+if settings.AUTO_CREATE_TABLES:
+    try:
+        # print("Dropping all tables...")
+        # Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+    except Exception:
+        print("Database initialization failed")
+        traceback.print_exc()
